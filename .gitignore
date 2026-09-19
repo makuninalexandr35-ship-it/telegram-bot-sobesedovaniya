@@ -1,0 +1,10 @@
+# Local secrets. Keep the empty template above under version control.
+.env
+.env.*
+!.env.example
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.venv/
+venv/
