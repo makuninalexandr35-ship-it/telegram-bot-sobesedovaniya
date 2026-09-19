@@ -1,0 +1,16 @@
+from typing import Protocol, TypeVar
+
+from pydantic import BaseModel
+
+from app.services.ai.schemas import AnswerEvaluation, GeneratedQuestion, InterviewSummary, ResumeAnalysis, VacancyAnalysis
+
+T = TypeVar("T", bound=BaseModel)
+
+
+class AIProvider(Protocol):
+    async def generate_question(self, context: dict) -> GeneratedQuestion: ...
+    async def evaluate_answer(self, context: dict) -> AnswerEvaluation: ...
+    async def analyze_vacancy(self, text: str, resume: str | None = None) -> VacancyAnalysis: ...
+    async def analyze_resume(self, text: str) -> ResumeAnalysis: ...
+    async def create_summary(self, context: dict) -> InterviewSummary: ...
+
