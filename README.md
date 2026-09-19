@@ -1,7 +1,23 @@
-# Telegram-бот для собеседований
+# Telegram-бот для тренировочных собеседований
 
-Минимальный Telegram-бот на Python, который отвечает на команду `/start`. Он
-работает на стандартной библиотеке Python и не требует сторонних пакетов.
+Бот проводит последовательное интервью из 10 вопросов для одной из шести
+профессий. Пользователь выбирает профессию и уровень через inline-кнопки, затем
+отвечает на вопросы по одному. В конце бот показывает вопросы, краткое резюме
+каждого ответа и число полученных ответов. Состояние хранится отдельно для
+каждого `chat_id`, поэтому несколько пользователей могут проходить интервью
+одновременно.
+
+Проект использует только стандартную библиотеку Python и Telegram Bot API через
+long polling. Сторонние зависимости и `requirements.txt` не нужны.
+
+## Команды
+
+- `/start` — начать интервью;
+- `/restart` — сбросить текущий прогресс и начать заново;
+- `/cancel` — прекратить текущее интервью.
+
+Состояние хранится в памяти процесса: после перезапуска программы незавершённые
+интервью будут сброшены.
 
 ## Безопасная настройка токена
 
@@ -14,79 +30,73 @@
    ```
 
 3. Впишите токен **только** в локальный файл `.env` после знака `=`. Файл
-   `.env` исключён из Git. Никогда не добавляйте токен в исходный код, README,
-   команды Git, логи или сообщения об ошибках.
+   `.env` исключён из Git. Никогда не добавляйте токен в код, README, команды
+   Git, логи или сообщения об ошибках.
 
-Если токен был опубликован, немедленно отзовите его через BotFather, выпустите
-новый и замените значение в окружении.
+Если токен был опубликован, немедленно отзовите его через BotFather и выпустите
+новый.
 
 ## Локальный запуск
 
-Требуется Python 3.9 или новее. Загрузите переменные из `.env` в текущий shell
-и запустите бота:
+Требуется Python 3.10 или новее. Загрузите переменную окружения из `.env` и
+запустите основной файл:
 
 ```bash
 set -a
 . ./.env
 set +a
-python3 bot.py
+python bot.py
 ```
 
-После сообщения об успешном запуске откройте чат с ботом и отправьте `/start`.
-Если `TELEGRAM_BOT_TOKEN` отсутствует или пуст, программа завершится с понятной
-ошибкой конфигурации. Остановить процесс можно сочетанием `Ctrl+C`.
+При отсутствии или пустом значении `TELEGRAM_BOT_TOKEN` программа завершится с
+понятной ошибкой, не раскрывающей секрет. Для остановки нажмите `Ctrl+C`.
 
 ## Запуск на сервере с systemd
 
-1. Клонируйте репозиторий, например в `/opt/interview-bot`, и создайте отдельный
-   системный аккаунт `interview-bot`.
-2. Создайте файл `/etc/interview-bot.env` (он находится вне репозитория):
+Создайте защищённый файл `/etc/interview-bot.env` вне репозитория:
 
-   ```text
-   TELEGRAM_BOT_TOKEN=вставьте_токен_только_на_сервере
-   ```
+```text
+TELEGRAM_BOT_TOKEN=вставьте_токен_только_на_сервере
+```
 
-3. Ограничьте доступ: `sudo chmod 600 /etc/interview-bot.env`.
-4. Создайте `/etc/systemd/system/interview-bot.service`:
+Ограничьте доступ командой `sudo chmod 600 /etc/interview-bot.env`, а затем
+создайте `/etc/systemd/system/interview-bot.service`:
 
-   ```ini
-   [Unit]
-   Description=Telegram interview bot
-   After=network-online.target
-   Wants=network-online.target
+```ini
+[Unit]
+Description=Telegram interview bot
+After=network-online.target
+Wants=network-online.target
 
-   [Service]
-   Type=simple
-   User=interview-bot
-   WorkingDirectory=/opt/interview-bot
-   EnvironmentFile=/etc/interview-bot.env
-   ExecStart=/usr/bin/python3 /opt/interview-bot/bot.py
-   Restart=on-failure
-   RestartSec=5
+[Service]
+Type=simple
+User=interview-bot
+WorkingDirectory=/opt/interview-bot
+EnvironmentFile=/etc/interview-bot.env
+ExecStart=/usr/bin/python3 /opt/interview-bot/bot.py
+Restart=on-failure
+RestartSec=5
 
-   [Install]
-   WantedBy=multi-user.target
-   ```
+[Install]
+WantedBy=multi-user.target
+```
 
-5. Активируйте сервис:
+Активируйте сервис:
 
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable --now interview-bot
-   sudo systemctl status interview-bot
-   ```
-
-Для production-сервера храните секрет в менеджере секретов платформы или в
-закрытом `EnvironmentFile`, а не в репозитории.
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now interview-bot
+sudo systemctl status interview-bot
+```
 
 ## Проверки
 
 ```bash
-python3 -m unittest discover -v
-python3 -m compileall -q bot.py tests
+python -m unittest discover -v
+python -m compileall -q bot.py tests
 ```
 
-Перед отправкой изменений убедитесь, что `.env` игнорируется:
+Чтобы убедиться, что локальный секрет не попадёт в коммит:
 
 ```bash
 git check-ignore .env
