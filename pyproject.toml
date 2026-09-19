@@ -1,0 +1,30 @@
+[project]
+name = "interview-ai-bot"
+version = "0.1.0"
+description = "Telegram-бот для тренировки собеседований"
+requires-python = ">=3.12"
+dependencies = [
+  "aiogram>=3.13,<4", "sqlalchemy[asyncio]>=2.0.35,<3", "asyncpg>=0.29,<1",
+  "alembic>=1.13,<2", "redis>=5.1,<6", "pydantic>=2.9,<3",
+  "pydantic-settings>=2.5,<3", "openai>=1.51,<2", "pypdf>=5,<6",
+  "python-docx>=1.1,<2", "structlog>=24.4,<26"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<9", "pytest-asyncio>=0.24,<1", "aiosqlite>=0.20,<1", "ruff>=0.7,<1"]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
